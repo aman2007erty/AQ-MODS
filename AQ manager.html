@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AQ MODS PANEL</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+body{background:black;color:white;overflow:hidden;}
+#binary{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;overflow:hidden;}
+.column{position:absolute;top:0;font-family:monospace;font-size:16px;user-select:none;pointer-events:none;}
+.column span{opacity:0.5;color:red;text-shadow:0 0 5px red,0 0 10px lime;display:block;animation:fade 1.5s linear infinite;}
+@keyframes fade{0%{opacity:0;}50%{opacity:1;}100%{opacity:0;}}
+
+.login-box,#panelPage > div{width:90%;max-width:1200px;margin:auto;position:relative;z-index:2;}
+#loginPage{height:100vh;display:flex;justify-content:center;align-items:center;}
+.login-box{background:rgba(0,0,0,0.7);padding:30px;border-radius:25px;box-shadow:0 0 20px red;}
+.logo{text-align:center;font-size:40px;font-weight:bold;margin-bottom:10px;color:red;}
+.subtitle{text-align:center;color:#ff4d4d;margin-bottom:25px;}
+.input{width:100%;padding:15px;border:1px solid #ff1a1a;border-radius:12px;margin-top:10px;font-size:18px;outline:none;background:rgba(30,30,30,0.8);color:white;}
+.btn{width:100%;padding:15px;background:red;color:white;border:none;border-radius:12px;margin-top:20px;font-size:20px;cursor:pointer;transition:0.3s;}
+.btn:hover{opacity:0.85;transform:scale(1.03);}
+.error{text-align:center;color:#ff4d4d;margin-top:15px;}
+#panelPage{display:none;padding:30px;animation:fadeIn 0.7s ease;max-height:100vh;overflow-y:auto;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.top{text-align:center;}
+.top img{width:100px;border-radius:10px;}
+.title{margin-top:15px;font-size:45px;font-weight:bold;color:red;text-shadow:0 0 15px green,0 0 25px red;}
+
+/* STATS CARDS WITH HOVER SHINE */
+.stats-cards{
+  display:flex;
+  justify-content:center;
+  gap:40px;
+  margin-top:50px;
+  flex-wrap:wrap;
+}
+.stat-card{
+  background: rgba(0,0,0,0.7);
+  padding: 20px 40px;
+  border-radius: 15px;
+  box-shadow: 0 0 20px red, 0 0 40px lime;
+  text-align: center;
+  min-width: 180px;
+  transition: 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card h3{
+  font-size:20px;
+  color:red;
+  text-shadow:0 0 10px lime;
+  margin-bottom:10px;
+}
+.stat-card p{
+  font-size:32px;
+  font-weight:bold;
+  color:lime;
+  text-shadow:0 0 15px lime;
+}
+.stat-card:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 30px red,0 0 60px lime;
+}
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.2), rgba(255,255,255,0.6), rgba(255,255,255,0.2));
+  transform: skewX(-25deg);
+}
+.stat-card:hover::before {
+  animation: shine 1s forwards;
+}
+@keyframes shine {
+  0% { left: -75%; }
+  100% { left: 125%; }
+}
+
+/* BUTTONS WITH PULSE */
+.panel-btn, #keyOptions button, .game-btn {
+  padding: 18px 40px;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 0 5px red, 0 0 10px red;
+  animation: pulseRed 1.5s infinite alternate;
+}
+@keyframes pulseRed{
+  0%{box-shadow:0 0 5px red,0 0 10px red;}
+  50%{box-shadow:0 0 15px red,0 0 30px red;}
+  100%{box-shadow:0 0 5px red,0 0 10px red;}
+}
+
+.buttons{display:flex;justify-content:center;flex-wrap:wrap;gap:20px;margin-top:50px;}
+.slide{overflow:hidden;max-height:0;opacity:0;transition:max-height 0.7s ease, opacity 0.7s ease;}
+.slide.show{max-height:2000px;opacity:1;}
+.game-btn{padding:15px 35px;margin:10px;border:none;background:red;color:white;border-radius:10px;font-size:18px;cursor:pointer;transition:0.3s;}
+.game-btn:hover{opacity:0.9;transform:scale(1.05);}
+#keyOptions h2{margin-bottom:20px;}
+#keyOptions button{margin:5px;padding:10px 20px;background:red;border:none;color:white;border-radius:10px;cursor:pointer;transition:0.3s;}
+#keyOptions button:hover{transform:scale(1.05);opacity:0.9;}
+#lastKey{margin-top:15px;color:lightgreen;font-weight:bold;}/* MANAGE KEYS LIST */
+#manageKeysSection ul{
+  list-style:none;
+  padding-left:0;
+  color:white;
+}
+#manageKeysSection li{
+  padding:8px 0;
+  border-bottom:1px solid red;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width:768px){
+  .stats-cards{flex-direction:column;gap:20px;margin-top:30px;}
+  .stat-card{width:80%;min-width:0;}
+  .buttons{flex-direction:column;gap:15px;}
+  .panel-btn, .game-btn, #keyOptions button{width:100%;padding:15px;font-size:18px;}
+  .title{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div id="binary"></div>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="logo">AQ MODS</div>
+    <div class="subtitle">Sign in to your account</div>
+    <input type="text" id="user" class="input" placeholder="User">
+    <input type="password" id="pass" class="input" placeholder="Pass">
+    <button class="btn" onclick="login()">Sign In</button>
+    <div class="error" id="error"></div>
+  </div>
+</div>
+
+<!-- PANEL PAGE -->
+<div id="panelPage">
+  <div>
+    <div class="top">
+      <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+      <div class="title">AQ MODS PANEL</div>
+    </div>
+
+    <!-- Stats cards -->
+    <div class="stats-cards">
+      <div class="stat-card">
+        <h3>TOTAL CREDITS</h3>
+        <p id="totalCredits">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>TOTAL ACTIVE KEYS</h3>
+        <p id="activeKeys">0</p>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+      <button class="panel-btn" onclick="toggleGames()">CREATE KEY</button>
+      <button class="panel-btn" onclick="buyCredits()">BUY CREDITS</button>
+      <button class="panel-btn" onclick="toggleManageKeys()">MANAGE KEYS</button>
+    </div>
+
+    <!-- CREATE KEY Section -->
+    <div id="gameSection" class="slide">
+      <h1>SELECT GAME</h1>
+      <button class="game-btn" onclick="toggleKeys('AQ GLOBAL')">AQ GLOBAL</button>
+      <button class="game-btn" onclick="toggleKeys('AQ LITE')">AQ LITE</button>
+      <button class="game-btn" onclick="toggleKeys('AQ IOS')">AQ IOS</button>
+      <button class="game-btn" onclick="toggleKeys('ALL AQ')">ALL AQ</button>
+    </div>
+
+    <!-- Key options -->
+    <div id="keyOptions" class="slide">
+      <h2 id="gameTitle"></h2>
+      <button onclick="notEnoughCredits()">1 DAY KEY - 0.5 CREDITS</button>
+      <button onclick="notEnoughCredits()">7 DAY KEY - 1 CREDIT</button>
+      <button onclick="notEnoughCredits()">14 DAY KEY - 2 CREDITS</button>
+      <button onclick="notEnoughCredits()">30 DAY KEY - 3 CREDITS</button>
+      <p id="lastKey"></p>
+    </div>
+
+    <!-- MANAGE KEYS Section -->
+    <div id="manageKeysSection" class="slide">
+      <h1>MANAGE KEYS</h1>
+      <ul id="keysList">
+        <li>KEY-1 : ACTIVE</li>
+        <li>KEY-2 : EXPIRED</li>
+        <li>KEY-3 : ACTIVE</li>
+        <li>KEY-4 : ACTIVE</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Binary columns with random fading and glow
+const binaryContainer=document.getElementById("binary");
+const cols=Math.floor(window.innerWidth/20);
+const chars=['0','1'];
+for(let i=0;i<cols;i++){
+    let col=document.createElement("div");
+    col.className="column";
+    col.style.left=(i*20)+"px";
+    binaryContainer.appendChild(col);
+    let y=0;
+    setInterval(()=>{
+        let char=chars[Math.floor(Math.random()*chars.length)];
+        let span=document.createElement("span");
+        span.innerText=char;
+        span.style.color=Math.random()>0.5?'red':'lime';
+        span.style.textShadow=Math.random()>0.5?'0 0 5px red,0 0 10px lime':'0 0 5px lime,0 0 10px red';
+        col.appendChild(span);
+        y+=16;
+        if(y>window.innerHeight){col.innerHTML="";y=0;}
+    },50+Math.random()*50);
+}
+
+// Panel functions with fixed login
+function login(){
+  let user=document.getElementById("user").value.trim().toUpperCase();let pass=document.getElementById("pass").value.trim();
+  if(user==="DIDDY" && pass==="2098"){
+    document.getElementById("loginPage").style.display="none";
+    document.getElementById("panelPage").style.display="block";
+  } else {document.getElementById("error").innerText="Wrong User or Password";}
+}
+function toggleGames(){document.getElementById("gameSection").classList.toggle("show");}
+function buyCredits(){window.open("https://t.me/LIOSMODDER","_blank");}
+function toggleKeys(game){
+  let ko=document.getElementById("keyOptions");
+  let title=document.getElementById("gameTitle");
+  if(ko.classList.contains("show") && title.innerText===game){ko.classList.remove("show");title.innerText="";}
+  else{ko.classList.add("show");title.innerText=game;}
+}
+function notEnoughCredits(){document.getElementById("lastKey").innerText="Not enough credits";}
+function toggleManageKeys(){document.getElementById("manageKeysSection").classList.toggle("show");}
+</script>
+</body>
+</html>
